@@ -1,0 +1,33 @@
+name: tick
+
+on:
+  schedule:
+    # 5分ごと。毎時0分の混雑を避けて 3,8,13,...,58 分に動かす
+    - cron: "3-58/5 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: tick
+  cancel-in-progress: false
+
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: POST /api/tick
+        env:
+          TICK_URL: ${{ secrets.TICK_URL }}
+          TICK_SECRET: ${{ secrets.TICK_SECRET }}
+        run: |
+          if [ -z "$TICK_URL" ] || [ -z "$TICK_SECRET" ]; then
+            echo "Secrets TICK_URL / TICK_SECRET are not set" >&2
+            exit 1
+          fi
+          curl -fsS -X POST \
+            --max-time 60 --retry 2 --retry-delay 5 --retry-all-errors \
+            -H "x-tick-secret: $TICK_SECRET" \
+            -o /dev/null -w "status %{http_code} in %{time_total}s\n" \
+            "$TICK_URL"
