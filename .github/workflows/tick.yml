@@ -3,7 +3,7 @@ name: tick
 on:
   schedule:
     # 5分ごと。毎時0分の混雑を避けて 3,8,13,...,58 分に動かす
-    - cron: "3-58/5 * * * *"
+    - cron: "3,8,13,18,23,28,33,38,43,48,53,58 * * * *"
   workflow_dispatch:
 
 permissions: {}
